@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
+using static MenuUIHandler;
 
 public class MainManager : MonoBehaviour
 {
@@ -12,16 +14,28 @@ public class MainManager : MonoBehaviour
 
     public Text ScoreText;
     public GameObject GameOverText;
-    
+    public Text highscoreText;
+
+
+
     private bool m_Started = false;
     private int m_Points;
-    
     private bool m_GameOver = false;
 
     
     // Start is called before the first frame update
     void Start()
     {
+        // Load player data from file and update highscoreText
+        MenuUIHandler menuUIHandler = FindObjectOfType<MenuUIHandler>();
+        if (menuUIHandler != null)
+        {
+            MenuUIHandler.PlayerData playerData = menuUIHandler.LoadPlayerData();
+            if (playerData != null)
+            {
+                highscoreText.text = "Highscore: " + playerData.playerName + " - " + playerData.score.ToString();
+            }
+        }
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -36,6 +50,9 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
+        ScoreText.text = "Score: " + m_Points.ToString();
+
     }
 
     private void Update()
@@ -68,9 +85,16 @@ public class MainManager : MonoBehaviour
         ScoreText.text = $"Score : {m_Points}";
     }
 
+
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        highscoreText.text = "Best Score: Kenay" + m_Points.ToString();
+
+
     }
+
+
+
 }
