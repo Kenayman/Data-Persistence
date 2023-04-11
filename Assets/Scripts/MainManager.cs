@@ -3,43 +3,39 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
-using static MenuUIHandler;
 
 public class MainManager : MonoBehaviour
 {
+
     public Brick BrickPrefab;
     public int LineCount = 6;
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text HighscoreText;
+    private string currentName;
+    private string highestName;
     public GameObject GameOverText;
-    public Text highscoreText;
-
-
 
     private bool m_Started = false;
     private int m_Points;
+
     private bool m_GameOver = false;
 
-    
     // Start is called before the first frame update
     void Start()
     {
-        // Load player data from file and update highscoreText
-        MenuUIHandler menuUIHandler = FindObjectOfType<MenuUIHandler>();
-        if (menuUIHandler != null)
+        if (DataManager.Instance != null)
         {
-            MenuUIHandler.PlayerData playerData = menuUIHandler.LoadPlayerData();
-            if (playerData != null)
-            {
-                highscoreText.text = "Highscore: " + playerData.playerName + " - " + playerData.score.ToString();
-            }
+            currentName = DataManager.Instance.inputName;
+            highestName = DataManager.Instance.highestName;
+            HighscoreText.text = $"Best Score : {highestName} {DataManager.Instance.highestPoints}";
         }
+
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
-        int[] pointCountArray = new [] {1,1,2,2,5,5};
+
+        int[] pointCountArray = new[] { 1, 1, 2, 2, 5, 5 };
         for (int i = 0; i < LineCount; ++i)
         {
             for (int x = 0; x < perLine; ++x)
@@ -50,9 +46,6 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
-
-        ScoreText.text = "Score: " + m_Points.ToString();
-
     }
 
     private void Update()
@@ -83,18 +76,17 @@ public class MainManager : MonoBehaviour
     {
         m_Points += point;
         ScoreText.text = $"Score : {m_Points}";
+        if (m_Points > DataManager.Instance.highestPoints)
+        {
+            DataManager.Instance.highestPoints = m_Points;
+            DataManager.Instance.highestName = currentName;
+            HighscoreText.text = $"Best Score : {currentName} {m_Points}";
+        }
     }
-
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
-        highscoreText.text = "Best Score: Kenay" + m_Points.ToString();
-
-
     }
-
-
-
 }
